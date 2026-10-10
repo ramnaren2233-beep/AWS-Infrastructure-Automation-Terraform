@@ -1,31 +1,37 @@
 # Task-01: AWS Infrastructure Automation Using Terraform & GitHub Actions
 
-## Implementation Status
+## What I Did
 
 | S.No | Implementation | Status |
 |---:|---|---|
-| 1 | Terraform configuration files created | ✅ Completed |
-| 2 | AWS OIDC authentication configured | ✅ Completed |
-| 3 | GitHub Actions workflow configured | ✅ Completed |
-| 4 | Terraform Format, Init and Validate | ✅ Completed |
-| 5 | Terraform Plan and Apply | ✅ Completed |
-| 6 | AWS infrastructure provisioned | ✅ Completed |
-| 7 | Terraform Outputs verified | ✅ Completed |
-| 8 | Nginx web server tested in browser | ✅ Completed |
+| 1 | Created Terraform configuration files | ✅ Completed |
+| 2 | Configured AWS OIDC authentication | ✅ Completed |
+| 3 | Configured GitHub Actions workflow | ✅ Completed |
+| 4 | Executed Terraform Format, Init and Validate | ✅ Completed |
+| 5 | Executed Terraform Plan and Apply | ✅ Completed |
+| 6 | Provisioned AWS infrastructure using Terraform | ✅ Completed |
+| 7 | Verified Terraform Outputs | ✅ Completed |
+| 8 | Tested Nginx web server in browser | ✅ Completed |
 
-## Screenshots / Evidence
+## Required Evidence
 
-| S.No | Screenshot Name | What It Proves |
+| S.No | Evidence | Screenshot File Name |
 |---:|---|---|
-| 1 | `01-terraform-files.png` | Terraform configuration files in GitHub |
-| 2 | `02-github-actions-success.png` | GitHub Actions workflow completed successfully |
-| 3 | `03-terraform-apply-success.png` | Terraform Apply completed successfully |
-| 4 | `04-terraform-outputs.png` | Terraform output values displayed |
-| 5 | `05-nginx-browser.png` | Nginx web page opened successfully |
-| 6 | `06-aws-resources.png` | AWS resources visible in AWS Console |
+| 1 | Terraform configuration files in GitHub | `01-Terraform-Configuration.png` |
+| 2 | Successful GitHub Actions workflow | `02-GitHub-Actions-Success.png` |
+| 3 | Successful Terraform Apply | `03-Terraform-Apply-Success.png` |
+| 4 | Terraform Outputs | `04-Terraform-Outputs.png` |
+| 5 | VPC and two public subnets | `05-VPC-Public-Subnets.png` |
+| 6 | Internet Gateway, route table and associations | `06-Network-Routing.png` |
+| 7 | Security Group | `07-Security-Group.png` |
+| 8 | EC2 instance | `08-EC2-Instance.png` |
+| 9 | Elastic IP | `09-Elastic-IP.png` |
+| 10 | S3 bucket | `10-S3-Bucket.png` |
+| 11 | IAM Role and Instance Profile | `11-IAM-Role-Instance-Profile.png` |
+| 12 | Nginx web page in browser | `12-Nginx-Website.png` |
 
 ## Result
 
-AWS infrastructure was provisioned using Terraform and automated through GitHub Actions. The workflow completed successfully, Terraform outputs were verified, and the Nginx web page was tested in the browser.
+AWS infrastructure was provisioned using Terraform and automated through GitHub Actions. Terraform outputs and the Nginx web page were verified successfully.
 
-**Task-01 Status: Completed ✅**
+**Task-01 Status: Implementation Completed ✅**
