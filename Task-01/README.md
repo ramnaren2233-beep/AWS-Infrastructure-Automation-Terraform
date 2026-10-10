@@ -1,6 +1,4 @@
-# Task-01: AWS Infrastructure Automation Using Terraform & GitHub Actions
-
-## What I Did
+## Task-01: AWS Infrastructure Automation Using Terraform & GitHub Actions
 
 | S.No | Implementation | Status |
 |---:|---|---|
