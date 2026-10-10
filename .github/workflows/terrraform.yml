@@ -5,13 +5,15 @@ on:
     branches:
       - main
   pull_request:
+  workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
 
 jobs:
-  terraform:
+  terraform-plan:
+    name: Terraform Format, Validate and Plan
     runs-on: ubuntu-latest
 
     defaults:
@@ -25,14 +27,24 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Configure AWS credentials
+      - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::906543084508:role/GithubActionsTerraformRole
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ap-south-1
 
+      - name: Verify AWS Account
+        run: |
+          aws sts get-caller-identity
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          if [ "$ACCOUNT_ID" != "906543084508" ]; then
+            echo "ERROR: Incorrect AWS account: $ACCOUNT_ID"
+            exit 1
+          fi
+          echo "AWS account verified successfully."
+
       - name: Terraform Format
-        run: terraform fmt -check -recursive -diff
+        run: terraform fmt -check -recursive
 
       - name: Terraform Init
         run: terraform init
@@ -41,4 +53,60 @@ jobs:
         run: terraform validate
 
       - name: Terraform Plan
-        run: terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: Upload Terraform Plan
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: Task-01/tfplan
+          retention-days: 1
+
+  terraform-apply:
+    name: Apply Terraform Infrastructure
+    needs: terraform-plan
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+
+    defaults:
+      run:
+        working-directory: Task-01
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ap-south-1
+
+      - name: Verify AWS Account
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          if [ "$ACCOUNT_ID" != "906543084508" ]; then
+            echo "ERROR: Incorrect AWS account: $ACCOUNT_ID"
+            exit 1
+          fi
+          echo "AWS account verified successfully."
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Download Terraform Plan
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
+          path: Task-01
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Terraform Outputs
+        run: terraform output
