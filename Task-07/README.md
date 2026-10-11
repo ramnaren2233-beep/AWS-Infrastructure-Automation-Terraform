@@ -1,4 +1,4 @@
-# Task 7: AWS Security
+# Task 7: AWS-Security
 
 | S.No | What I Did | Status |
 |---:|---|---|
