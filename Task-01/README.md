@@ -32,4 +32,4 @@
 
 AWS infrastructure was provisioned using Terraform and automated through GitHub Actions. Terraform outputs and the Nginx web page were verified successfully.
 
-**Task-01 Status: Implementation Completed ✅**
+**Task-01 Status: Implementation Completed ✅***
