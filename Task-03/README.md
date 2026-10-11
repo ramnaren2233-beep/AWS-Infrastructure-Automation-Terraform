@@ -1,4 +1,4 @@
-# Task 3: Reusable Terraform Modules - Submission
+# Task 3: Reusable Terraform Modules
 
 ## Work Summary
 
