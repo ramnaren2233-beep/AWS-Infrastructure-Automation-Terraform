@@ -1,4 +1,4 @@
-# Task 6: S3 Configuration
+# Task 6: S3-Configuration
 
 ## Work Summary
 
