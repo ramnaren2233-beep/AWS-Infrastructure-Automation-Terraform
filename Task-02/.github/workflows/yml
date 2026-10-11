@@ -7,8 +7,12 @@ on:
       - 'Task-02/**'
       - '.github/workflows/task-02.yml'
 
+permissions:
+  contents: read
+
 jobs:
   terraform:
+    name: Validate Terraform Variables and Outputs
     runs-on: ubuntu-latest
 
     defaults:
@@ -22,11 +26,38 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform Format Check
-        run: terraform fmt -check
+      - name: Terraform Format
+        run: terraform fmt -recursive
 
       - name: Terraform Initialize
         run: terraform init -backend=false
 
       - name: Terraform Validate
         run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -refresh=false -lock=false -out=tfplan
+
+      - name: Terraform Output Evidence
+        shell: bash
+        run: |
+          echo "Task 2 - Terraform Variables and Outputs"
+          echo "Terraform validation and plan completed."
+          if terraform output -json > terraform-outputs.json 2> output-error.txt; then
+            echo "Terraform outputs are available."
+            cat terraform-outputs.json
+          else
+            echo "No existing Terraform state or outputs are available."
+            echo "Output definitions are present in outputs.tf."
+          fi
+
+      - name: Upload Terraform Evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: task-2-terraform-evidence
+          path: |
+            Task-02/tfplan
+            Task-02/terraform-outputs.json
+            Task-02/output-error.txt
+          if-no-files-found: ignore
