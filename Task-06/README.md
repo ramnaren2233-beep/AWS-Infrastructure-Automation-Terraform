@@ -1,7 +1,5 @@
 # Task 6: S3-Configuration
 
-## Work Summary
-
 | S.No | What I Did | Status |
 |---|---|---|
 | 1 | Implemented an S3 bucket with Versioning, Server-Side Encryption (AES256), and Block Public Access enabled through Terraform configuration. | ✅ Completed |
