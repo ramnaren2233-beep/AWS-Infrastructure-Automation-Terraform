@@ -1,19 +1,24 @@
-output "aws_region" {
-  description = "AWS region configured for this project"
-  value       = var.aws_region
+output "vpc_id" {
+  description = "Created VPC ID"
+  value       = aws_vpc.main.id
 }
 
-output "environment" {
-  description = "Deployment environment"
-  value       = var.environment
+output "ec2_instance_id" {
+  description = "Created EC2 Instance ID"
+  value       = aws_instance.web.id
 }
 
-output "vpc_cidr" {
-  description = "Configured VPC CIDR"
-  value       = var.vpc_cidr
+output "elastic_ip" {
+  description = "Allocated Elastic IP"
+  value       = aws_eip.web.public_ip
 }
 
-output "instance_type" {
-  description = "Configured EC2 instance type"
-  value       = var.instance_type
+output "application_url" {
+  description = "Application URL"
+  value       = "http://${aws_eip.web.public_ip}"
+}
+
+output "s3_bucket_name" {
+  description = "Created S3 bucket name"
+  value       = aws_s3_bucket.project.bucket
 }
