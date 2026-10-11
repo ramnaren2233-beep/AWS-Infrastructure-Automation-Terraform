@@ -1,4 +1,4 @@
-name: Terraform CI/CD
+name: Terraform CI/CD Automation
 
 on:
   push:
@@ -6,17 +6,57 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  terraform:
-    name: Terraform Run
+  terraform_pipeline:
+    name: Terraform Full Lifecycle
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        shell: bash
+
     steps:
-      - name: Checkout Code
+      # 1. Checkout Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
+      # 2. Setup Terraform
+      - name: 2. Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Run Success Verification
-        run: echo "Task 3 Reusable Modules Applied Successfully ✅"
+      # 3. Terraform Format Check
+      - name: 3. Terraform Format Check
+        run: terraform fmt -check -recursive
+
+      # 4. Terraform Init
+      - name: 4. Terraform Init
+        run: terraform init -input=false
+
+      # 5. Terraform Validate
+      - name: 5. Terraform Validate
+        run: terraform validate
+
+      # 6. Terraform Plan
+      - name: 6. Terraform Plan
+        run: terraform plan -input=false -no-color -out=tfplan
+
+      # 7. Upload Plan as Artifact
+      - name: 7. Upload Plan as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
+          retention-days: 1
+
+      # 8. Manual Approval Reminder
+      - name: 8. Manual Approval Reminder
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "Plan generated. Review the plan before applying infrastructure changes."
+
+      # 9. Terraform Outputs
+      - name: 9. Terraform Outputs
+        if: always() && steps.terraform_init.outcome == 'success'
+        run: echo "Review Terraform outputs after deployment."
