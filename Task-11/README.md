@@ -1,4 +1,4 @@
-# Task 11: Terraform Plan & Artifact Verification
+# Task 11: Terraform-Plan & Artifact-Verification
 
 ## 📋 Task Details
 
