@@ -1,4 +1,19 @@
+
 # Task 8: GitHub Actions CI/CD for Terraform Deployment
+
+## 📋 Task Details
+
+| Field | Details |
+| :--- | :--- |
+| **Task Name** | Task 8 - GitHub Actions CI/CD for Terraform |
+| **Tools Used** | GitHub Actions, Terraform |
+| **Workflow File** | `.github/workflows/terraform.yml` |
+| **Terraform Code** | `Task-08/main.tf` |
+| **Overall Status** | ✅ Completed |
+
+---
+
+## 🛠️ Execution Summary
 
 | S.No | Stage | What I Did | Status |
 | :---: | :--- | :--- | :---: |
@@ -15,20 +30,22 @@
 
 ---
 
-## 📸 Screenshots
+## 📸 Screenshots (Run Evidence)
 
-| S.No | Screenshot File | Evidence For |
-| :---: | :--- | :--- |
-| 1 | `01-Checkout.png` | Repository checkout step |
-| 2 | `02-Terraform-Format.png` | Terraform format check |
-| 3 | `03-Terraform-Init.png` | Terraform initialization |
-| 4 | `04-Terraform-Validate.png` | Terraform validation |
-| 5 | `05-Terraform-Plan.png` | Terraform plan generation |
-| 6 | `06-Plan-Artifact.png` | Plan uploaded as artifact |
-| 7 | `07-Manual-Approval.png` | Manual approval gate |
-| 8 | `08-Terraform-Apply.png` | Terraform apply after approval |
-| 9 | `09-Terraform-Outputs.png` | Terraform outputs |
-| 10 | `10-Infrastructure-Validation.png` | Post-deployment validation |
+All screenshots are stored in the `task-8-evidence/` folder.
+
+| S.No | Screenshot File |
+| :---: | :--- |
+| 1 | `01-Checkout.png` |
+| 2 | `02-Terraform-Format.png` |
+| 3 | `03-Terraform-Init.png` |
+| 4 | `04-Terraform-Validate.png` |
+| 5 | `05-Terraform-Plan.png` |
+| 6 | `06-Plan-Artifact.png` |
+| 7 | `07-Manual-Approval.png` |
+| 8 | `08-Terraform-Apply.png` |
+| 9 | `09-Terraform-Outputs.png` |
+| 10 | `10-Infrastructure-Validation.png` |
 
 ---
 
