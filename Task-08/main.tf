@@ -1,7 +1,10 @@
-name: Terraform CI/CD Automation
+name: Terraform CI/CD
 
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   workflow_dispatch:
@@ -10,35 +13,40 @@ permissions:
   contents: read
 
 jobs:
-  terraform-plan:
-    name: Terraform Format, Validate and Plan
+  terraform:
+    name: Terraform Lifecycle
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Checkout Source Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
-      - name: 2. Locate Terraform Configuration
+      - name: 2. Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: 3. Locate Terraform Configuration
         id: locate
         shell: bash
         run: |
-          echo "Current directory:"
+          echo "Repository directory:"
           pwd
-          echo "Terraform files:"
+          echo "Files in repository:"
+          ls -la
+          echo "Terraform configuration files:"
           find . -type f -name "*.tf" \
             -not -path "./.git/*" \
             -not -path "./.terraform/*"
+
           if [ -f main.tf ]; then
             echo "tfdir=." >> "$GITHUB_OUTPUT"
           elif [ -f terraform/main.tf ]; then
             echo "tfdir=terraform" >> "$GITHUB_OUTPUT"
           else
-            echo "ERROR: main.tf not found at repository root or terraform/"
+            echo "::error::main.tf not found in repository root or terraform/ directory."
             exit 1
           fi
-
-      - name: 3. Setup Terraform
-        uses: hashicorp/setup-terraform@v3
 
       - name: 4. Terraform Format
         working-directory: ${{ steps.locate.outputs.tfdir }}
@@ -54,27 +62,31 @@ jobs:
 
       - name: 7. Terraform Plan
         working-directory: ${{ steps.locate.outputs.tfdir }}
-        run: terraform plan -out=tfplan
+        run: terraform plan -no-color -out=tfplan
 
       - name: 8. Upload Plan Artifact
         uses: actions/upload-artifact@v4
         with:
           name: terraform-plan
           path: ${{ steps.locate.outputs.tfdir }}/tfplan
+          if-no-files-found: error
           retention-days: 5
 
   terraform-apply:
     name: Manual Approval and Apply
-    needs: terraform-plan
+    needs: terraform
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: terraform-production
 
     steps:
-      - name: 1. Checkout Source Code
+      - name: 1. Checkout Code
         uses: actions/checkout@v4
 
       - name: 2. Setup Terraform
         uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
 
       - name: 3. Locate Terraform Configuration
         id: locate
@@ -85,7 +97,7 @@ jobs:
           elif [ -f terraform/main.tf ]; then
             echo "tfdir=terraform" >> "$GITHUB_OUTPUT"
           else
-            echo "ERROR: main.tf not found"
+            echo "::error::main.tf not found."
             exit 1
           fi
 
@@ -106,3 +118,8 @@ jobs:
       - name: 7. Terraform Outputs
         working-directory: ${{ steps.locate.outputs.tfdir }}
         run: terraform output
+
+      - name: 8. Infrastructure Validation
+        run: |
+          echo "Terraform apply completed."
+          echo "Review Terraform outputs and AWS Console to verify resources."
