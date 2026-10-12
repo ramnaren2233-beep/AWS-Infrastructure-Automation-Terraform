@@ -1,77 +1,46 @@
-name: Terraform CI/CD Task 8
-
+name: Terraform CI/CD
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
-
 permissions:
+  id-token: write
   contents: read
-
+env:
+  AWS_REGION: ap-south-1   # உங்க region போடுங்க
 jobs:
-  terraform:
-    name: Terraform Lifecycle
+  plan:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: "Task 08"
-
     steps:
-      - name: 1. Checkout Code
-        uses: actions/checkout@v4
-
-      - name: 2. Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: actions/checkout@v4            # 1 Checkout
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          terraform_version: 1.5.0
-
-      - name: 3. Check Terraform Configuration
-        run: |
-          pwd
-          ls -la
-          if [ ! -f main.tf ]; then
-            echo "ERROR: main.tf not found inside Task 08"
-            exit 1
-          fi
-
-      - name: 4. Terraform Format
-        run: terraform fmt -check -recursive
-
-      - name: 5. Terraform Init
-        run: terraform init
-
-      - name: 6. Terraform Validate
-        run: terraform validate
-
-      - name: 7. Terraform Plan
-        run: terraform plan -no-color -out=tfplan
-
-      - name: 8. Upload Plan Artifact
-        uses: actions/upload-artifact@v4
+          role-to-arn: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform fmt -check -recursive # 2 Format
+      - run: terraform init                  # 3 Init
+      - run: terraform validate              # 4 Validate
+      - run: terraform plan -out=tfplan      # 5 Plan
+      - uses: actions/upload-artifact@v4     # 6 Upload
         with:
-          name: terraform-plan
-          path: "Task 08/tfplan"
-          if-no-files-found: error
-          retention-days: 5
-
-      - name: 9. Review Plan Notice
-        run: echo "Terraform plan is ready for review."
-
-      - name: 10. Terraform Apply
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform apply -auto-approve tfplan
-
-      - name: 11. Terraform Outputs
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: terraform output
-
-      - name: 12. Infrastructure Validation
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          terraform output
-          echo "Review AWS resources to verify infrastructure."
+          name: tfplan
+          path: tfplan
+  apply:
+    needs: plan
+    runs-on: ubuntu-latest
+    environment: production                  # 7 Manual Approval
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-arn: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+      - run: terraform init
+      - uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+      - run: terraform apply tfplan          # 8 Apply
+      - run: terraform output                # 9 Outputs
+      - run: terraform state list            # 10 Infra validation
