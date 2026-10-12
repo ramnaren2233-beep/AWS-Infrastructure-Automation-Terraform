@@ -1,46 +1,81 @@
 name: Terraform CI/CD
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   id-token: write
   contents: read
+
 env:
-  AWS_REGION: ap-south-1   # உங்க region போடுங்க
+  AWS_REGION: ap-south-1
+
 jobs:
   plan:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4            # 1 Checkout
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-arn: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - uses: hashicorp/setup-terraform@v3
-      - run: terraform fmt -check -recursive # 2 Format
-      - run: terraform init                  # 3 Init
-      - run: terraform validate              # 4 Validate
-      - run: terraform plan -out=tfplan      # 5 Plan
-      - uses: actions/upload-artifact@v4     # 6 Upload
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: Upload Plan Artifact
+        uses: actions/upload-artifact@v4
         with:
           name: tfplan
           path: tfplan
+
   apply:
     needs: plan
     runs-on: ubuntu-latest
-    environment: production                  # 7 Manual Approval
+    environment: production
     steps:
-      - uses: actions/checkout@v4
-      - uses: aws-actions/configure-aws-credentials@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-arn: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
-      - uses: hashicorp/setup-terraform@v3
-      - run: terraform init
-      - uses: actions/download-artifact@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Download Plan Artifact
+        uses: actions/download-artifact@v4
         with:
           name: tfplan
-      - run: terraform apply tfplan          # 8 Apply
-      - run: terraform output                # 9 Outputs
-      - run: terraform state list            # 10 Infra validation
+
+      - name: Terraform Apply
+        run: terraform apply tfplan
+
+      - name: Terraform Outputs
+        run: terraform output
+
+      - name: Infrastructure Validation
+        run: terraform state list
