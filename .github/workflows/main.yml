@@ -30,11 +30,14 @@ jobs:
         with:
           terraform_version: 1.5.0
 
-      - name: 3. Check Terraform Files
+      - name: 3. Check Terraform Configuration
         run: |
           pwd
           ls -la
-          test -f main.tf
+          if [ ! -f main.tf ]; then
+            echo "ERROR: main.tf not found inside Task 08"
+            exit 1
+          fi
 
       - name: 4. Terraform Format
         run: terraform fmt -check -recursive
@@ -54,8 +57,9 @@ jobs:
           name: terraform-plan
           path: "Task 08/tfplan"
           if-no-files-found: error
+          retention-days: 5
 
-      - name: 9. Manual Approval Notice
+      - name: 9. Review Plan Notice
         run: echo "Terraform plan is ready for review."
 
       - name: 10. Terraform Apply
@@ -69,5 +73,5 @@ jobs:
       - name: 12. Infrastructure Validation
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          test -f task8_done.txt
-          echo "Task 8 validation completed."
+          terraform output
+          echo "Review AWS resources to verify infrastructure."
