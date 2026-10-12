@@ -6,40 +6,63 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
-  terraform_pipeline:
-    name: Terraform Full Lifecycle
+  terraform-plan:
+    name: Terraform Format, Validate and Plan
     runs-on: ubuntu-latest
 
     steps:
-      - name: 1. Checkout Code
-        run: echo "Code checkout completed successfully."
+      - name: 1. Checkout
+        uses: actions/checkout@v4
 
-      - name: 2. Terraform Format
-        run: echo "Terraform configuration follows standard formatting."
+      - name: 2. Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: 3. Terraform Format
+        run: terraform fmt -check -recursive
+
+      - name: 4. Terraform Init
+        run: terraform init
+
+      - name: 5. Terraform Validate
+        run: terraform validate
+
+      - name: 6. Terraform Plan
+        run: terraform plan -out=tfplan
+
+      - name: 7. Upload Plan Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: terraform-plan
+          path: tfplan
+          retention-days: 5
+
+  terraform-apply:
+    name: Manual Approval and Apply
+    needs: terraform-plan
+    runs-on: ubuntu-latest
+    environment: terraform-production
+
+    steps:
+      - name: 1. Checkout
+        uses: actions/checkout@v4
+
+      - name: 2. Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
       - name: 3. Terraform Init
-        run: echo "Terraform Initialized Successfully with remote state ✅"
+        run: terraform init
 
-      - name: 4. Terraform Validate
-        run: echo "Terraform Configuration Validated Successfully ✅"
+      - name: 4. Download Plan Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: terraform-plan
 
-      - name: 5. Terraform Plan
-        run: echo "Terraform Plan Generated and Verified Successfully ✅"
+      - name: 5. Terraform Apply
+        run: terraform apply -auto-approve tfplan
 
-      - name: 6. Upload Plan as Artifact
-        run: echo "Terraform Plan saved as secure pipeline artifact ✅"
-
-      - name: 7. Manual Approval Verification
-        run: echo "Manual gate approval granted for deployment ✅"
-
-      - name: 8. Terraform Apply
-        run: echo "Infrastructure Deployment Applied and Approved Successfully ✅"
-
-      - name: 9. Terraform Outputs
-        run: |
-          echo "instance_id = aws_instance.web_server.id"
-          echo "vpc_id = aws_vpc.main.id"
-
-      - name: 10. Infrastructure Validation
-        run: echo "Final infrastructure lifecycle validated successfully! ✅"
+      - name: 6. Terraform Outputs
+        run: terraform output
