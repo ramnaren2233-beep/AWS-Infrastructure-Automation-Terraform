@@ -1,4 +1,4 @@
-# Task 9: Terraform Formatting Verification via CI/CD
+# Task 9: Terraform-Formatting-Verification-via-CI/CD
 
 ## 📋 Task Details
 
